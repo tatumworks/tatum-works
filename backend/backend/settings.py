@@ -121,13 +121,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=not DEBUG,
-    )
-}
+
+if os.getenv("DATABASE_URL"):
+    # Use the provided database (e.g., Postgres on Render)
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    # Fallback to local SQLite for dev / no DATABASE_URL set
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 
 
@@ -184,4 +195,5 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = "DENY"
+
 
